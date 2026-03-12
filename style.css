@@ -1,0 +1,497 @@
+/* ===== ОБЩИЕ СТИЛИ И ПЕРЕМЕННЫЕ ===== */
+:root {
+    --bg-gradient-start: #0c0c15;
+    --bg-gradient-end: #1a1a2a;
+    --container-bg: #1e1e2f;
+    --container-border: #4a3f6e;
+    --text-primary: #e0e0f0;
+    --text-secondary: #c0c0ff;
+    --accent-dark: #3a3a5a;
+    --accent-light: #4a3f7a;
+    --accent-border: #6a5a8a;
+    --accent-glow: #8a7ab0;
+    --panel-bg: #f8f4e8;
+    --panel-text: #1a1a2a;
+    --cell-border: #2c3e50;
+    --correct-bg: #c0e0c0;
+    --incorrect-bg: #f0b0b0;
+    --hint-bg: #e0f0e0;
+    --highlight-bg: #fffacd;
+    --shadow-dark: 0 8px 0 #1a1a30;
+    --shadow-light: 0 5px 0 #1a1a40;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+    background: linear-gradient(145deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 16px;
+}
+
+/* ===== ОСНОВНОЙ КОНТЕЙНЕР ===== */
+.container {
+    max-width: 1200px;
+    width: 100%;
+    background-color: var(--container-bg);
+    border-radius: 48px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), 0 8px 16px rgba(0, 0, 0, 0.6);
+    padding: 32px 28px;
+    border: 1px solid var(--container-border);
+    color: var(--text-primary);
+}
+
+/* ===== УПРАВЛЕНИЕ ЭКРАНАМИ ===== */
+.screen {
+    transition: opacity 0.2s ease;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ===== ТИПОГРАФИКА ===== */
+h1 {
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 2.2rem;
+    letter-spacing: -0.5px;
+    margin-bottom: 40px;
+    text-align: center;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+h2 {
+    color: #b0b0f0;
+    margin-bottom: 24px;
+    font-size: 1.8rem;
+    text-align: center;
+}
+
+/* ===== КНОПКИ МЕНЮ ===== */
+.menu-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: stretch;
+}
+
+.menu-btn {
+    background-color: var(--accent-dark);
+    border: none;
+    border-radius: 60px;
+    padding: 22px 20px;
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #f0f0ff;
+    cursor: pointer;
+    box-shadow: var(--shadow-dark), 0 10px 20px rgba(0,0,0,0.5);
+    transition: all 0.08s linear;
+    border: 1px solid var(--accent-border);
+    letter-spacing: 1px;
+}
+
+.menu-btn:active {
+    transform: translateY(6px);
+    box-shadow: 0 2px 0 #1a1a30, 0 8px 16px rgba(0,0,0,0.4);
+}
+
+.menu-btn.old {
+    background-color: #4a3f6e;
+    box-shadow: 0 8px 0 #2a1f4a;
+}
+
+/* ===== КНОПКИ ВЫБОРА РЕЖИМА ===== */
+.mode-buttons {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.mode-btn {
+    background-color: var(--accent-dark);
+    border: none;
+    border-radius: 40px;
+    padding: 16px 32px;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #f0f0ff;
+    cursor: pointer;
+    box-shadow: 0 5px 0 #1a1a30;
+    transition: all 0.08s linear;
+    border: 1px solid var(--accent-border);
+    flex: 1 1 auto;
+    min-width: 200px;
+}
+
+.mode-btn:active {
+    transform: translateY(4px);
+    box-shadow: 0 1px 0 #1a1a30;
+}
+
+/* ===== ШАПКА (навигация и счётчик) ===== */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+}
+
+.back-btn {
+    background-color: var(--accent-dark);
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    font-weight: 600;
+    padding: 12px 28px;
+    border-radius: 40px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #1a1a30;
+    transition: 0.05s linear;
+    border: 1px solid #5a4a7a;
+}
+
+.back-btn:active {
+    transform: translateY(4px);
+    box-shadow: 0 0 0 #1a1a30;
+}
+
+.counter {
+    background-color: #2a2a40;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 1.2rem;
+    padding: 10px 24px;
+    border-radius: 40px;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+    border: 1px solid #5a4a7a;
+}
+
+/* ===== КЛАССИЧЕСКАЯ ИГРА (предложение и ответы) ===== */
+.sentence-box {
+    background-color: #2a2a42;
+    border-radius: 32px;
+    padding: 32px 28px;
+    margin-bottom: 32px;
+    font-size: 1.9rem;
+    color: #f0f0ff;
+    text-align: center;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.5), 0 4px 8px rgba(0,0,0,0.3);
+    border: 1px solid #5a4a7a;
+    font-style: italic;
+    word-break: break-word;
+    line-height: 1.5;
+}
+
+.sentence-box strong {
+    background-color: var(--accent-light);
+    color: #ffffff;
+    padding: 0 12px;
+    border-radius: 40px;
+    font-weight: 700;
+    font-style: normal;
+    box-shadow: 0 4px 0 #1a1f3a;
+    border: 1px solid var(--accent-glow);
+}
+
+.options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+    margin-bottom: 32px;
+}
+
+.option-btn {
+    background-color: #2a2a42;
+    border: 2px solid #5a4a7a;
+    color: var(--text-secondary);
+    font-size: 1.5rem;
+    font-weight: 600;
+    padding: 22px 8px;
+    border-radius: 40px;
+    cursor: pointer;
+    box-shadow: 0 5px 0 #1a1a30, 0 6px 14px rgba(0,0,0,0.5);
+    transition: all 0.06s;
+    line-height: 1.2;
+    word-break: break-word;
+}
+
+.option-btn:not(:disabled):active {
+    transform: translateY(4px);
+    box-shadow: 0 1px 0 #1a1a30, 0 6px 14px rgba(0,0,0,0.4);
+}
+
+.option-btn:disabled {
+    opacity: 0.4;
+    filter: grayscale(0.5);
+    box-shadow: 0 2px 0 #1a1a30;
+    transform: translateY(3px);
+    cursor: not-allowed;
+    background-color: #1a1a30;
+    border-color: #3a2a5a;
+}
+
+/* ===== КРОССВОРД ===== */
+.crossword-layout {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+/* Сетка со словами */
+.crossword-words {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background-color: transparent;
+    padding: 10px;
+}
+
+.word-row {
+    display: flex;
+    gap: 4px;
+}
+
+/* Ячейка для буквы */
+.crossword-cell {
+    width: 60px;
+    height: 60px;
+    background-color: white;
+    border: 2px solid var(--cell-border);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    font-family: 'Arial', sans-serif;
+}
+
+.crossword-cell input {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    text-align: center;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #000;
+    text-transform: uppercase;
+    outline: none;
+    border-radius: 6px;
+}
+
+.crossword-cell input:focus {
+    background-color: #e0f0fa;
+    box-shadow: 0 0 0 2px #3498db;
+}
+
+/* Подсветка активной строки */
+.crossword-cell.highlight {
+    background-color: var(--highlight-bg);
+}
+
+/* Номер слова в первой клетке */
+.cell-number {
+    position: absolute;
+    top: 2px;
+    left: 4px;
+    font-size: 0.8rem;
+    color: var(--cell-border);
+    font-weight: bold;
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* Панель вопросов справа */
+.clues-panel {
+    min-width: 300px;
+    max-width: 350px;
+    background-color: var(--panel-bg);
+    border-radius: 24px;
+    padding: 20px;
+    border: 2px solid var(--container-border);
+    color: var(--panel-text);
+    font-family: 'Courier New', monospace;
+    box-shadow: 5px 5px 0 rgba(0,0,0,0.1);
+}
+
+.clue-item {
+    margin-bottom: 12px;
+    padding: 12px;
+    background-color: #fff;
+    border: 1px solid #aaa;
+    border-radius: 30px;
+    display: flex;
+    gap: 12px;
+    cursor: pointer;
+    transition: 0.1s;
+    font-size: 1rem;
+}
+
+.clue-item:hover {
+    background-color: #e0e8f0;
+}
+
+.clue-item.active {
+    background-color: #c0d0f0;
+    border: 2px solid var(--cell-border);
+}
+
+.clue-number {
+    background-color: var(--cell-border);
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    flex-shrink: 0;
+    font-size: 1rem;
+}
+
+.clue-text {
+    flex: 1;
+    color: var(--panel-text);
+    line-height: 1.3;
+}
+
+/* ===== КНОПКИ ДЕЙСТВИЙ (проверить, очистить, подсказка) ===== */
+.crossword-actions {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    margin: 24px 0;
+    flex-wrap: wrap;
+}
+
+.crossword-btn,
+.next-btn {
+    background-color: var(--accent-light);
+    border: none;
+    color: white;
+    font-size: 1.2rem;
+    font-weight: 600;
+    padding: 14px 28px;
+    border-radius: 40px;
+    cursor: pointer;
+    box-shadow: var(--shadow-light);
+    transition: 0.05s;
+    border: 1px solid var(--accent-glow);
+    min-width: 160px;
+}
+
+.crossword-btn:active,
+.next-btn:active {
+    transform: translateY(4px);
+    box-shadow: 0 1px 0 #1a1a40;
+}
+
+.hint-btn {
+    background-color: var(--accent-dark);
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.5rem;
+    font-weight: 600;
+    padding: 18px 0;
+    width: 100%;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 6px 0 #1a1a30;
+    margin-bottom: 24px;
+    transition: 0.05s;
+    border: 1px solid var(--accent-border);
+}
+
+.hint-btn:active {
+    transform: translateY(5px);
+    box-shadow: 0 1px 0 #1a1a30;
+}
+
+/* ===== ИНФОРМАЦИОННЫЕ БЛОКИ ===== */
+.info-box,
+.crossword-info {
+    background-color: #2a2a42;
+    border-left: 10px solid #6a4aaa;
+    border-radius: 36px;
+    padding: 28px 24px;
+    color: var(--text-secondary);
+    font-size: 1.25rem;
+    line-height: 1.5;
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.5), 0 8px 16px rgba(0,0,0,0.3);
+    margin-bottom: 24px;
+    min-height: 120px;
+    border-right: 1px solid #5a4a7a;
+}
+
+.crossword-info {
+    background-color: var(--panel-bg);
+    border-left: 10px solid var(--accent-light);
+    color: var(--panel-text);
+    font-family: 'Courier New', monospace;
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.1);
+    min-height: 80px;
+}
+
+/* ===== СООБЩЕНИЕ ОБ ОКОНЧАНИИ ===== */
+.finish-message {
+    text-align: center;
+    background: #2a2a42;
+    border-radius: 40px;
+    padding: 30px;
+    font-size: 2rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    margin-top: 20px;
+    border: 2px solid #5a4a7a;
+}
+
+/* ===== АДАПТАЦИЯ ПОД МОБИЛЬНЫЕ УСТРОЙСТВА ===== */
+@media (max-width: 800px) {
+    h1 { font-size: 1.8rem; }
+    .menu-btn { font-size: 1.5rem; padding: 16px; }
+    .sentence-box { font-size: 1.5rem; padding: 24px 16px; }
+    .options { grid-template-columns: 1fr; }
+    .option-btn { font-size: 1.3rem; padding: 18px; }
+    
+    .crossword-cell {
+        width: 45px;
+        height: 45px;
+    }
+    .crossword-cell input {
+        font-size: 1.6rem;
+    }
+    .clues-panel {
+        min-width: 250px;
+    }
+}
+
+@media (max-width: 500px) {
+    .container { padding: 20px; }
+    .mode-btn { min-width: 150px; font-size: 1.2rem; }
+    .crossword-cell {
+        width: 35px;
+        height: 35px;
+    }
+    .crossword-cell input {
+        font-size: 1.3rem;
+    }
+    .cell-number {
+        font-size: 0.6rem;
+    }
+}
