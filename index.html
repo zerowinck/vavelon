@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Синонимы — элитарная версия</title>
+    <style>
+        /* Базовые стили */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            background: radial-gradient(circle at 10% 20%, #0a0a1a, #050510);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 16px;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            background: rgba(20, 20, 40, 0.9);
+            backdrop-filter: blur(8px);
+            border-radius: 64px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255,255,255,0.1);
+            padding: 32px 28px;
+            border: 1px solid rgba(100, 80, 150, 0.5);
+            color: #e8e8ff;
+        }
+
+        .screen { transition: all 0.2s ease; }
+        .hidden { display: none !important; }
+
+        h1 {
+            font-size: 2.6rem;
+            background: linear-gradient(135deg, #d4b8ff, #a080e0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 50px;
+            text-align: center;
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .menu-buttons { display: flex; flex-direction: column; gap: 20px; margin-top: 20px; }
+        .mode-buttons { display: flex; gap: 20px; justify-content: center; margin: 20px 0 30px 0; flex-wrap: wrap; }
+
+        .menu-btn, .mode-btn {
+            background: linear-gradient(145deg, #2a2a4a, #1e1e3a);
+            border: none;
+            border-radius: 60px;
+            padding: 20px 32px;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #f0eaff;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+            transition: all 0.1s ease;
+            backdrop-filter: blur(4px);
+        }
+        .mode-btn { padding: 14px 28px; font-size: 1.3rem; }
+        .menu-btn:active, .mode-btn:active { transform: translateY(4px); box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 28px;
+        }
+
+        .back-btn {
+            background: #2a2a4a;
+            border: none;
+            border-radius: 60px;
+            padding: 12px 28px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #ddd0ff;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #0e0e1e;
+            min-width: 120px;
+            transition: 0.05s linear;
+        }
+        .back-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #0e0e1e; }
+
+        .sound-toggle {
+            background: #2a2a4a;
+            border: none;
+            border-radius: 60px;
+            padding: 12px 20px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #ddd0ff;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #0e0e1e;
+            transition: 0.05s linear;
+        }
+        .sound-toggle:active { transform: translateY(2px); box-shadow: 0 2px 0 #0e0e1e; }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(4px);
+            padding: 8px 24px;
+            border-radius: 60px;
+        }
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        .stat-value {
+            background: #3a2a6a;
+            padding: 4px 12px;
+            border-radius: 30px;
+            color: #ffecb3;
+        }
+
+        .progress, .timer {
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(4px);
+            padding: 8px 24px;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: 0.1s;
+        }
+
+        .timer.warning { background: #a04030; animation: pulse 0.8s infinite; }
+        .timer.critical { background: #c04030; animation: pulse 0.3s infinite; }
+
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; transform: scale(1.02); } 100% { opacity: 1; } }
+
+        .sentence-box {
+            background: rgba(30, 30, 60, 0.8);
+            border-radius: 48px;
+            padding: 32px;
+            margin-bottom: 32px;
+            font-size: 1.8rem;
+            text-align: center;
+            border: 1px solid #6a4e9e;
+            box-shadow: inset 0 1px 4px rgba(0,0,0,0.5), 0 10px 20px rgba(0,0,0,0.2);
+            animation: fadeSlide 0.3s ease-out;
+        }
+        @keyframes fadeSlide {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Выделение целевого слова (к которому подбирают синоним) */
+        .sentence-box strong {
+            background: linear-gradient(135deg, #ffd966, #ffb347);
+            color: #1e1e2f;
+            padding: 4px 12px;
+            border-radius: 40px;
+            display: inline-block;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            animation: glow 1.5s ease-in-out infinite;
+        }
+        @keyframes glow {
+            0% { box-shadow: 0 0 0 0 rgba(255, 180, 70, 0.4); }
+            70% { box-shadow: 0 0 0 8px rgba(255, 180, 70, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 180, 70, 0); }
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .option-btn {
+            background: linear-gradient(145deg, #2e2e4e, #20203a);
+            border: 1px solid #6a5a9a;
+            border-radius: 50px;
+            padding: 20px;
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #f0e8ff;
+            cursor: pointer;
+            transition: 0.05s linear;
+            box-shadow: 0 6px 0 #101020;
+            animation: fadeSlide 0.3s ease-out;
+        }
+        .option-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #101020; }
+        .option-btn:disabled { opacity: 0.5; filter: grayscale(0.3); transform: translateY(2px); cursor: not-allowed; }
+
+        .hint-btn {
+            background: #3a3a6a;
+            border: none;
+            border-radius: 50px;
+            padding: 16px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            width: 100%;
+            margin-bottom: 24px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #1a1a2a;
+            color: #e8e0ff;
+            transition: 0.05s linear;
+        }
+        .hint-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #1a1a2a; }
+
+        .info-box {
+            background: #20203a;
+            border-left: 8px solid #8a6ad0;
+            border-radius: 36px;
+            padding: 24px;
+            font-size: 1.2rem;
+            margin-bottom: 24px;
+            color: #e0e0f0;
+            transition: 0.2s;
+        }
+
+        .next-btn, .restart-btn {
+            background: linear-gradient(145deg, #6a4ac0, #4a2a90);
+            border: none;
+            border-radius: 60px;
+            padding: 18px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+            box-shadow: 0 8px 0 #2a1a50;
+            color: #fff;
+            transition: 0.05s linear;
+        }
+        .next-btn:active, .restart-btn:active { transform: translateY(4px); box-shadow: 0 4px 0 #2a1a50; }
+        .restart-btn { background: #6a4a9a; margin-top: 16px; }
+
+        /* Кроссворд */
+        .crossword-layout { display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; margin-top: 20px; }
+        .crossword-words {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 32px;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+        }
+        .word-row { display: flex; gap: 4px; flex-wrap: nowrap; }
+        .crossword-cell {
+            width: 60px; height: 60px;
+            background: white;
+            border: 2px solid #2c3e50;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            flex-shrink: 0;
+            transition: 0.1s;
+        }
+        .crossword-cell.highlight {
+            background-color: #fffacd;
+            box-shadow: 0 0 0 3px #f0e68c;
+        }
+        .crossword-cell input {
+            width: 100%; height: 100%;
+            background: transparent;
+            border: none;
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            outline: none;
+            color: #1a1a2a;
+        }
+        .cell-number {
+            position: absolute;
+            top: 2px; left: 4px;
+            font-size: 0.7rem;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            padding: 0 3px;
+            border-radius: 10px;
+        }
+        .clues-panel {
+            min-width: 280px;
+            background: #faf3e0;
+            border-radius: 32px;
+            padding: 20px;
+            border: 2px solid #4a3f6e;
+            color: #2c2c2c;
+            font-family: monospace;
+            box-shadow: 8px 8px 0 rgba(0,0,0,0.1);
+        }
+        .clue-item {
+            margin-bottom: 12px;
+            padding: 8px 12px;
+            background: #fff0d0;
+            border-radius: 40px;
+            display: flex;
+            gap: 10px;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .clue-item.active {
+            background: #d4c0a0;
+            box-shadow: 0 0 0 2px #4a3f6e;
+        }
+        .clue-number { background: #3a2a6a; color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .crossword-actions { display: flex; gap: 16px; justify-content: center; margin: 20px 0; }
+        .crossword-btn { background: #4a3f7a; color: white; padding: 12px 24px; border-radius: 40px; cursor: pointer; border: none; font-weight: bold; transition: 0.05s linear; }
+        .crossword-btn:active { transform: translateY(2px); }
+
+        @media (max-width: 768px) {
+            .container { padding: 20px 16px; border-radius: 40px; }
+            h1 { font-size: 2rem; margin-bottom: 30px; }
+            .menu-btn, .mode-btn { font-size: 1.3rem; padding: 14px 20px; }
+            .mode-btn { padding: 12px 20px; font-size: 1.2rem; }
+            .header { flex-direction: column; align-items: stretch; gap: 12px; }
+            .back-btn, .sound-toggle { width: 100%; text-align: center; min-width: auto; padding: 10px 20px; font-size: 1.1rem; }
+            .stats { justify-content: center; width: 100%; gap: 15px; padding: 8px 16px; }
+            .progress, .timer { text-align: center; width: 100%; padding: 8px 16px; }
+            .sentence-box { font-size: 1.4rem; padding: 24px 16px; }
+            .options { grid-template-columns: 1fr; gap: 12px; }
+            .option-btn { font-size: 1.2rem; padding: 16px; }
+            .hint-btn { font-size: 1.2rem; padding: 14px; }
+            .info-box { font-size: 1rem; padding: 20px; }
+            .next-btn, .restart-btn { font-size: 1.3rem; padding: 14px; }
+            .crossword-layout { flex-direction: column; align-items: center; }
+            .crossword-words { width: 100%; padding: 12px; }
+            .crossword-cell { width: 45px; height: 45px; }
+            .crossword-cell input { font-size: 1.6rem; }
+            .clues-panel { min-width: auto; width: 100%; margin-top: 20px; }
+            .crossword-actions { flex-wrap: wrap; }
+            .crossword-btn { padding: 10px 16px; font-size: 1rem; }
+        }
+        @media (max-width: 480px) {
+            .container { padding: 16px 12px; }
+            h1 { font-size: 1.7rem; }
+            .menu-btn, .mode-btn { font-size: 1.1rem; padding: 12px 16px; }
+            .stats { gap: 10px; padding: 6px 12px; }
+            .stat-item { font-size: 0.9rem; }
+            .progress, .timer { font-size: 0.9rem; padding: 6px 12px; }
+            .sentence-box { font-size: 1.2rem; padding: 20px 12px; }
+            .option-btn { font-size: 1rem; padding: 14px; }
+            .crossword-cell { width: 38px; height: 38px; }
+            .crossword-cell input { font-size: 1.3rem; }
+            .cell-number { font-size: 0.55rem; top: 1px; left: 2px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div id="menu-screen" class="screen">
+        <h1>✧ игра синонимов ✧</h1>
+        <div class="menu-buttons">
+            <button class="menu-btn" id="btn-young">💬 молодёжные</button>
+            <button class="menu-btn old" id="btn-simple">📖 литературные</button>
+        </div>
+    </div>
+
+    <div id="mode-screen" class="screen hidden">
+        <h2 id="mode-category-title" style="margin-bottom: 20px;">Молодёжные</h2>
+        <div class="mode-buttons">
+            <button class="mode-btn" id="btn-mode-classic">🎮 Классическая</button>
+            <button class="mode-btn" id="btn-mode-crossword">🔤 Кроссворд</button>
+        </div>
+        <button class="back-btn" id="btn-back-from-mode" style="width: 100%; margin-top: 20px;">← назад</button>
+    </div>
+
+    <div id="game-screen" class="screen hidden">
+        <div class="header">
+            <button class="back-btn" id="btn-back-from-game">← назад</button>
+            <button class="sound-toggle" id="sound-toggle">🔊 Звук вкл</button>
+            <div class="stats">
+                <div class="stat-item">⭐ <span id="score-display" class="stat-value">0</span></div>
+                <div class="stat-item">❤️ <span id="lives-display" class="stat-value">5</span></div>
+            </div>
+            <div class="progress" id="progress-display">1 / 20</div>
+            <div class="timer" id="timer-display">⏱️ 15 сек</div>
+        </div>
+        <div id="sentence-box" class="sentence-box">Загрузка...</div>
+        <div id="options-container" class="options"></div>
+        <button class="hint-btn" id="btn-hint">💡 подсказка (-1 жизнь)</button>
+        <div id="info-box" class="info-box">👆 выбери слово</div>
+        <button id="btn-next" class="next-btn hidden">➡️ дальше</button>
+        <button id="btn-restart" class="restart-btn hidden">🔄 начать заново</button>
+    </div>
+
+    <div id="crossword-screen" class="screen hidden">
+        <div class="header">
+            <button class="back-btn" id="btn-back-from-crossword">← назад</button>
+            <button class="sound-toggle" id="sound-toggle-crossword">🔊 Звук вкл</button>
+            <span class="counter" style="background: rgba(0,0,0,0.4); padding: 8px 24px; border-radius: 60px;">кроссворд</span>
+        </div>
+        <div class="crossword-layout">
+            <div class="crossword-words" id="crossword-words"></div>
+            <div class="clues-panel" id="clues-panel"><div id="clues-list"></div></div>
+        </div>
+        <div class="crossword-actions">
+            <button class="crossword-btn" id="btn-check-crossword">✅ проверить</button>
+            <button class="crossword-btn" id="btn-clear-crossword">🔄 очистить</button>
+            <button class="crossword-btn" id="btn-hint-crossword">💡 подсказка</button>
+        </div>
+        <div id="crossword-info" class="crossword-info" style="margin-top: 16px; background: #fff0d0; padding: 16px; border-radius: 24px; color: #2c2c2c;">✏️ Вводи буквы — курсор переходит сам</div>
+    </div>
+</div>
+
+<script>
+    (function(){
+        // ========== ЭЛИТАРНЫЙ СЛОВАРЬ (20 слов для каждой категории) ==========
+        const eliteYoung = [
+            { slang: 'имба', sentence: 'Новый трек — абсолютная <strong>имба</strong>!', correct: 'доминанта', info: 'Доминанта — господствующее положение, превосходство', incorrect: ['посредственность','неудача','промах'], hint: 'нечто лучшее' },
+            { slang: 'кринж', sentence: 'Его выступление — сплошной <strong>кринж</strong>.', correct: 'фрустрация', info: 'Фрустрация — чувство неловкости, разочарования', incorrect: ['восторг','упоение','эйфория'], hint: 'чувство стыда' },
+            { slang: 'топ', sentence: 'Этот артист — настоящий <strong>топ</strong>.', correct: 'элита', info: 'Элита — лучшие представители', incorrect: ['аутсайдер','середняк','неудачник'], hint: 'высшая категория' },
+            { slang: 'хайп', sentence: 'Сейчас вокруг NFT бешеный <strong>хайп</strong>.', correct: 'конъюнктура', info: 'Конъюнктура — временная шумиха, рыночный ажиотаж', incorrect: ['апатия','равнодушие','стагнация'], hint: 'всеобщее обсуждение' },
+            { slang: 'зашквар', sentence: 'Опоздать на свидание — <strong>зашквар</strong>.', correct: 'ренегатство', info: 'Ренегатство — предательство, измена принципам', incorrect: ['доблесть','честь','благородство'], hint: 'стыдная ситуация' },
+            { slang: 'рофл', sentence: 'Мы <strong>рофлили</strong> над абсурдом.', correct: 'ирония', info: 'Ирония — тонкая насмешка', incorrect: ['плач','гнев','ярость'], hint: 'веселились' },
+            { slang: 'краш', sentence: 'Она — мой идеальный <strong>краш</strong>.', correct: 'идеал', info: 'Идеал — совершенство, предмет стремлений', incorrect: ['антипатия','отвращение','неприязнь'], hint: 'объект обожания' },
+            { slang: 'вайб', sentence: 'У этого места особый <strong>вайб</strong>.', correct: 'аура', info: 'Аура — энергетическое поле, обстановка', incorrect: ['диссонанс','хаос','разлад'], hint: 'настроение' },
+            { slang: 'агриться', sentence: 'Не стоит <strong>агриться</strong> на критику.', correct: 'агрессировать', info: 'Агрессировать — проявлять враждебность', incorrect: ['умиротворяться','смиряться','прощать'], hint: 'проявлять агрессию' },
+            { slang: 'чиллить', sentence: 'Люблю <strong>чиллить</strong> бездельничать.', correct: 'прокрастинировать', info: 'Прокрастинировать — откладывать дела, бездельничать', incorrect: ['трудиться','усердствовать','действовать'], hint: 'расслабляться' },
+            { slang: 'пруф', sentence: 'Предъяви <strong>пруфы</strong>!', correct: 'верификация', info: 'Верификация — подтверждение достоверности', incorrect: ['выдумка','гипотеза','предположение'], hint: 'подтверждение' },
+            { slang: 'токсик', sentence: 'Он настоящий <strong>токсик</strong>.', correct: 'деструктив', info: 'Деструктив — разрушитель, вредоносное влияние', incorrect: ['альтруист','созидатель','меценат'], hint: 'отравляет общение' },
+            { slang: 'изи', sentence: 'Это задание — <strong>изи</strong>.', correct: 'тривиально', info: 'Тривиально — банально, просто', incorrect: ['замысловато','сложно','громоздко'], hint: 'без усилий' },
+            { slang: 'залипать', sentence: 'Можно часами <strong>залипать</strong>.', correct: 'абсорбироваться', info: 'Абсорбироваться — поглощаться, втягиваться', incorrect: ['действовать','двигаться','активничать'], hint: 'уходить с головой' },
+            { slang: 'флексить', sentence: 'Он любит <strong>флексить</strong> успехами.', correct: 'эпатировать', info: 'Эпатировать — вызывать шок, бравировать', incorrect: ['скромничать','занижать','умалчивать'], hint: 'демонстрировать превосходство' },
+            { slang: 'го', sentence: '<strong>Го</strong> на концерт?', correct: 'следуем', info: 'Следуем — отправляемся', incorrect: ['остаёмся','мешкаем','тормозим'], hint: 'призыв идти' },
+            { slang: 'байт', sentence: 'Это был чистой воды <strong>байт</strong>.', correct: 'манипуляция', info: 'Манипуляция — скрытое управление, уловка', incorrect: ['искренность','прямота','честность'], hint: 'провокация' },
+            { slang: 'кек', sentence: 'Я ответил просто <strong>кек</strong>.', correct: 'сарказм', info: 'Сарказм — едкая насмешка', incorrect: ['комплимент','лесть','одобрение'], hint: 'ироничный смех' },
+            { slang: 'лол', sentence: '<strong>Лол</strong>, умора!', correct: 'комизм', info: 'Комизм — смешное положение', incorrect: ['трагедия','драма','пафос'], hint: 'интернет-смех' },
+            { slang: 'хейтить', sentence: 'Перестань <strong>хейтить</strong>.', correct: 'дискредитировать', info: 'Дискредитировать — подрывать репутацию, ругать', incorrect: ['восхвалять','превозносить','поддерживать'], hint: 'проявлять агрессию' }
+        ];
+
+        const eliteSimple = [
+            { slang: 'прикольный', sentence: 'Очень <strong>прикольный</strong> сюжет.', correct: 'экстравагантный', info: 'Экстравагантный — необычный, вызывающий', incorrect: ['банальный','скучный','шаблонный'], hint: 'интересный, необычный' },
+            { slang: 'забавно', sentence: '<strong>Забавно</strong> наблюдать.', correct: 'пикантно', info: 'Пикантно — остро, с изюминкой', incorrect: ['уныло','тоскливо','безрадостно'], hint: 'вызывает смех' },
+            { slang: 'классно', sentence: 'Время провели <strong>классно</strong>.', correct: 'великолепно', info: 'Великолепно — изумительно, превосходно', incorrect: ['плохо','скверно','никудышно'], hint: 'очень хорошо' },
+            { slang: 'симпатичный', sentence: 'Какой <strong>симпатичный</strong> малыш!', correct: 'обаятельный', info: 'Обаятельный — притягательный', incorrect: ['противный','мерзкий','гадкий'], hint: 'приятный' },
+            { slang: 'удивительно', sentence: '<strong>Удивительно</strong>, но факт.', correct: 'парадоксально', info: 'Парадоксально — противоречит ожиданиям', incorrect: ['закономерно','предсказуемо','логично'], hint: 'внезапно' },
+            { slang: 'потрясающе', sentence: 'Выглядит <strong>потрясающе</strong>.', correct: 'сенсационно', info: 'Сенсационно — вызывающее восторг, шум', incorrect: ['уныло','бледно','безлико'], hint: 'очень красиво' },
+            { slang: 'чудесный', sentence: '<strong>Чудесный</strong> вечер.', correct: 'благодатный', info: 'Благодатный — благоприятный, прекрасный', incorrect: ['унылый','тягостный','мучительный'], hint: 'замечательный' },
+            { slang: 'замечательно', sentence: 'Ты <strong>замечательно</strong> справился.', correct: 'идеально', info: 'Идеально — безупречно, без ошибок', incorrect: ['посредственно','неудовлетворительно','плохо'], hint: 'очень хорошо' },
+            { slang: 'интересно', sentence: 'Было <strong>интересно</strong>.', correct: 'интригующе', info: 'Интригующе — захватывающе', incorrect: ['скупо','однообразно','пресно'], hint: 'захватывает' },
+            { slang: 'красиво', sentence: 'Она <strong>красиво</strong> поёт.', correct: 'виртуозно', info: 'Виртуозно — мастерски, с блеском', incorrect: ['фальшиво','неумело','коряво'], hint: 'вызывает восхищение' },
+            { slang: 'ласково', sentence: 'Говорил <strong>ласково</strong>.', correct: 'умиротворяюще', info: 'Умиротворяюще — нежно, успокаивающе', incorrect: ['грубо','жестоко','резко'], hint: 'с любовью' },
+            { slang: 'дружелюбно', sentence: 'Встретили <strong>дружелюбно</strong>.', correct: 'радушно', info: 'Радушно — приветливо, открыто', incorrect: ['враждебно','холодно','отстранённо'], hint: 'доброжелательно' },
+            { slang: 'аккуратно', sentence: 'Всё сложил <strong>аккуратно</strong>.', correct: 'педантично', info: 'Педантично — до мелочей, тщательно', incorrect: ['халтурно','небрежно','наспех'], hint: 'с заботой о порядке' },
+            { slang: 'быстро', sentence: 'Он <strong>быстро</strong> рванул.', correct: 'молниеносно', info: 'Молниеносно — мгновенно, стремительно', incorrect: ['черепашьи','медленно','вяло'], hint: 'с высокой скоростью' },
+            { slang: 'громко', sentence: 'Засмеялся <strong>громко</strong>.', correct: 'оглушительно', info: 'Оглушительно — чрезвычайно громко', incorrect: ['тихо','беззвучно','едва слышно'], hint: 'с большой громкостью' },
+            { slang: 'весело', sentence: 'Нам было <strong>весело</strong>.', correct: 'беспечно', info: 'Беспечно — беззаботно, легко', incorrect: ['уныло','грустно','тягостно'], hint: 'чувство радости' },
+            { slang: 'тихо', sentence: 'Вокруг <strong>тихо</strong>.', correct: 'безгласно', info: 'Безгласно — в полной тишине', incorrect: ['шумно','звонко','гулко'], hint: 'отсутствие шума' },
+            { slang: 'светло', sentence: 'В зале <strong>светло</strong>.', correct: 'лучезарно', info: 'Лучезарно — ярко, сияюще', incorrect: ['темно','мрачно','сумрачно'], hint: 'много света' },
+            { slang: 'тепло', sentence: 'На улице <strong>тепло</strong>.', correct: 'знойно', info: 'Знойно — жарко, душно', incorrect: ['холодно','ледяно','морозно'], hint: 'высокая температура' },
+            { slang: 'свежо', sentence: 'Утром было <strong>свежо</strong>.', correct: 'бодряще', info: 'Бодряще — освежающе, прохладно', incorrect: ['душно','спёрто','жарко'], hint: 'приятная прохлада' }
+        ];
+
+        const classicData = { young: eliteYoung, simple: eliteSimple };
+
+        function generateCrosswordFromCategory(category) {
+            const wordsData = classicData[category];
+            const shuffled = [...wordsData].sort(() => Math.random() - 0.5);
+            const selected = shuffled.slice(0, 5);
+            return selected.map((w, idx) => ({
+                id: idx+1,
+                answer: w.correct.toUpperCase().replace(/[^А-ЯЁ]/g, ''),
+                clue: w.hint ? w.hint : w.info.substring(0, 40)
+            }));
+        }
+
+        let currentCategory = 'young';
+        let currentQuestions = [];
+        let currentIndex = 0, score = 0, lives = 5, gameActive = true;
+        let timerInterval = null;
+        let audioCtx = null;
+        let soundEnabled = true;
+        let currentCrossword = null;
+
+        // DOM элементы
+        const menuScreen = document.getElementById('menu-screen');
+        const modeScreen = document.getElementById('mode-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const crosswordScreen = document.getElementById('crossword-screen');
+        const btnYoung = document.getElementById('btn-young');
+        const btnSimple = document.getElementById('btn-simple');
+        const btnBackFromMode = document.getElementById('btn-back-from-mode');
+        const btnModeClassic = document.getElementById('btn-mode-classic');
+        const btnModeCrossword = document.getElementById('btn-mode-crossword');
+        const btnBackFromGame = document.getElementById('btn-back-from-game');
+        const btnBackFromCrossword = document.getElementById('btn-back-from-crossword');
+        const modeCategoryTitle = document.getElementById('mode-category-title');
+        const btnHint = document.getElementById('btn-hint');
+        const btnNext = document.getElementById('btn-next');
+        const btnRestart = document.getElementById('btn-restart');
+        const sentenceBox = document.getElementById('sentence-box');
+        const optionsContainer = document.getElementById('options-container');
+        const infoBox = document.getElementById('info-box');
+        const scoreDisplay = document.getElementById('score-display');
+        const livesDisplay = document.getElementById('lives-display');
+        const progressDisplay = document.getElementById('progress-display');
+        const timerDisplay = document.getElementById('timer-display');
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.type = 'sine';
+                let freq = 440, duration = 0.2;
+                if (type === 'correct') { freq = 880; duration = 0.2; }
+                else if (type === 'wrong') { freq = 360; duration = 0.3; }
+                else if (type === 'hint') { freq = 660; duration = 0.15; }
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+                osc.start(now);
+                osc.stop(now + duration);
+            } catch(e) {}
+        }
+
+        function stopTimer() { if (timerInterval) clearInterval(timerInterval); }
+        function startTimer() {
+            stopTimer();
+            let left = 15;
+            timerDisplay.textContent = `⏱️ ${left} сек`;
+            timerDisplay.classList.remove('warning','critical');
+            timerInterval = setInterval(() => {
+                if (!gameActive) return;
+                left--;
+                timerDisplay.textContent = `⏱️ ${left} сек`;
+                if (left <= 5) timerDisplay.classList.add('warning');
+                if (left <= 2) timerDisplay.classList.add('critical');
+                if (left <= 0) { stopTimer(); handleTimeout(); }
+            }, 1000);
+        }
+
+        function handleTimeout() {
+            if (!gameActive) return;
+            playSound('wrong');
+            lives--;
+            livesDisplay.textContent = lives;
+            infoBox.innerHTML = `⏰ Время вышло! Правильный ответ: «${currentQuestions[currentIndex].correct}». ${currentQuestions[currentIndex].info}`;
+            if (lives <= 0) endGame(false);
+            else { gameActive = false; document.querySelectorAll('.option-btn').forEach(b => b.disabled = true); btnNext.classList.remove('hidden'); }
+        }
+
+        function endGame(isWin) {
+            stopTimer();
+            gameActive = false;
+            if (isWin && currentIndex >= currentQuestions.length) {
+                sentenceBox.innerHTML = `🎉 ТРИУМФ! 🎉<br>⭐ Счёт: ${score} ⭐<br>✅ Пройдено: ${currentQuestions.length}/${currentQuestions.length}`;
+                infoBox.innerHTML = `Вы покорили элитарный словарь! Блестяще!`;
+                localStorage.removeItem(`sinonim_progress_${currentCategory}`);
+            } else if (lives <= 0) {
+                sentenceBox.innerHTML = `💀 ПОРАЖЕНИЕ 💀<br>⭐ Счёт: ${score}<br>✅ Пройдено: ${currentIndex}/${currentQuestions.length}`;
+                infoBox.innerHTML = `Не хватило знаний. Попробуйте снова!`;
+                localStorage.removeItem(`sinonim_progress_${currentCategory}`);
+            } else return;
+            optionsContainer.innerHTML = '';
+            btnNext.classList.add('hidden');
+            btnRestart.classList.remove('hidden');
+        }
+
+        function updateProgress() { progressDisplay.textContent = `${currentIndex+1} / ${currentQuestions.length}`; }
+
+        function renderQuestion() {
+            if (!gameActive) return;
+            if (currentIndex >= currentQuestions.length) { endGame(true); return; }
+            const q = currentQuestions[currentIndex];
+            sentenceBox.style.animation = 'none';
+            sentenceBox.offsetHeight;
+            sentenceBox.style.animation = 'fadeSlide 0.3s ease-out';
+            sentenceBox.innerHTML = q.sentence;
+            const allOpts = [
+                { text: q.correct, info: q.info, correct: true },
+                ...q.incorrect.map(inc => ({ text: inc, info: inc, correct: false }))
+            ];
+            const shuffled = [...allOpts].sort(() => Math.random() - 0.5);
+            optionsContainer.innerHTML = '';
+            shuffled.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = opt.text;
+                btn.dataset.correct = opt.correct;
+                btn.dataset.info = opt.info;
+                btn.style.animation = `fadeSlide 0.3s ease-out ${idx * 0.05}s`;
+                btn.addEventListener('click', () => optionHandler(btn));
+                optionsContainer.appendChild(btn);
+            });
+            infoBox.innerHTML = '👆 выберите слово';
+            gameActive = true;
+            btnNext.classList.add('hidden');
+            updateProgress();
+            startTimer();
+        }
+
+        function optionHandler(btn) {
+            if (btn.disabled || !gameActive) return;
+            const isCorrect = btn.dataset.correct === 'true';
+            stopTimer();
+            if (isCorrect) {
+                score++;
+                scoreDisplay.textContent = score;
+                infoBox.innerHTML = `✅ Верно! ${btn.dataset.info}<br>+1 очко`;
+                document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+                gameActive = false;
+                btnNext.classList.remove('hidden');
+                playSound('correct');
+                saveProgress();
+            } else {
+                lives--;
+                livesDisplay.textContent = lives;
+                infoBox.innerHTML = `❌ Неверно. ${btn.dataset.info}`;
+                btn.disabled = true;
+                if (lives <= 0) endGame(false);
+                else startTimer();
+                playSound('wrong');
+            }
+        }
+
+        function saveProgress() {
+            const progress = {
+                questions: currentQuestions,
+                index: currentIndex,
+                score: score,
+                lives: lives,
+                gameActive: gameActive
+            };
+            localStorage.setItem(`sinonim_progress_${currentCategory}`, JSON.stringify(progress));
+        }
+
+        function loadProgress() {
+            const saved = localStorage.getItem(`sinonim_progress_${currentCategory}`);
+            if (saved) {
+                try {
+                    const p = JSON.parse(saved);
+                    if (p.questions && p.questions.length === classicData[currentCategory].length && p.index < p.questions.length) {
+                        currentQuestions = p.questions;
+                        currentIndex = p.index;
+                        score = p.score;
+                        lives = p.lives;
+                        gameActive = p.gameActive;
+                        scoreDisplay.textContent = score;
+                        livesDisplay.textContent = lives;
+                        renderQuestion();
+                        return true;
+                    }
+                } catch(e) {}
+            }
+            return false;
+        }
+
+        btnHint.addEventListener('click', () => {
+            if (!gameActive || !currentQuestions.length || currentIndex >= currentQuestions.length) { infoBox.innerHTML = 'Не сейчас.'; return; }
+            if (lives < 1) { infoBox.innerHTML = '❌ Недостаточно жизней!'; playSound('wrong'); return; }
+            lives--;
+            livesDisplay.textContent = lives;
+            const q = currentQuestions[currentIndex];
+            infoBox.innerHTML = `💡 Подсказка: ${q.hint}<br>❤️ -1 жизнь`;
+            playSound('hint');
+            if (lives <= 0) endGame(false);
+        });
+
+        function nextQuestion() {
+            if (!gameActive && currentIndex < currentQuestions.length) {
+                gameActive = true;
+                if (currentIndex < currentQuestions.length - 1) {
+                    currentIndex++;
+                    renderQuestion();
+                } else {
+                    currentIndex++;
+                    renderQuestion();
+                }
+                saveProgress();
+            }
+        }
+        btnNext.addEventListener('click', nextQuestion);
+        btnRestart.addEventListener('click', () => {
+            localStorage.removeItem(`sinonim_progress_${currentCategory}`);
+            loadClassic();
+        });
+
+        function loadClassic() {
+            const base = classicData[currentCategory];
+            if (loadProgress()) return;
+            currentQuestions = [...base].sort(() => Math.random() - 0.5);
+            currentIndex = 0; score = 0; lives = 5;
+            gameActive = true;
+            scoreDisplay.textContent = score;
+            livesDisplay.textContent = lives;
+            btnRestart.classList.add('hidden');
+            renderQuestion();
+        }
+
+        // кроссворд
+        function loadCrossword() {
+            const words = generateCrosswordFromCategory(currentCategory);
+            currentCrossword = { words };
+            renderCrossword();
+        }
+
+        function renderCrossword() {
+            if (!currentCrossword) return;
+            const words = currentCrossword.words;
+            let wordsHtml = '';
+            words.forEach((word, idx) => {
+                let rowHtml = `<div class="word-row" data-row="${idx}">`;
+                for (let i=0; i<word.answer.length; i++) {
+                    rowHtml += `<div class="crossword-cell" data-row="${idx}" data-col="${i}">${i===0?`<span class="cell-number">${idx+1}</span>`:''}<input type="text" maxlength="1" data-row="${idx}" data-col="${i}" class="crossword-input"></div>`;
+                }
+                rowHtml += '</div>';
+                wordsHtml += rowHtml;
+            });
+            document.getElementById('crossword-words').innerHTML = wordsHtml;
+            let cluesHtml = '';
+            words.forEach((word, idx) => {
+                cluesHtml += `<div class="clue-item" data-row="${idx}"><span class="clue-number">${idx+1}</span><span class="clue-text">${word.clue}</span></div>`;
+            });
+            document.getElementById('clues-list').innerHTML = cluesHtml;
+
+            document.querySelectorAll('.clue-item').forEach((item, idx) => {
+                item.addEventListener('click', () => {
+                    document.querySelectorAll('.clue-item').forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    highlightRow(idx);
+                    const rowElement = document.querySelector(`.word-row[data-row="${idx}"]`);
+                    if (rowElement) rowElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                });
+            });
+
+            document.querySelectorAll('.crossword-input').forEach(inp => {
+                inp.addEventListener('input', (e) => {
+                    let raw = e.target.value;
+                    if (raw.length > 0) {
+                        let lastChar = raw.slice(-1).toUpperCase();
+                        e.target.value = lastChar;
+                    } else {
+                        e.target.value = '';
+                    }
+                    if (e.target.value.length === 1) {
+                        const row = parseInt(e.target.dataset.row);
+                        const col = parseInt(e.target.dataset.col);
+                        const word = words[row];
+                        if (word && col < word.answer.length - 1) {
+                            const next = document.querySelector(`.crossword-input[data-row="${row}"][data-col="${col+1}"]`);
+                            if (next) next.focus();
+                        }
+                    }
+                });
+                inp.addEventListener('keydown', (e) => {
+                    if (e.key === 'Backspace' && e.target.value.length === 0) {
+                        const row = parseInt(e.target.dataset.row);
+                        const col = parseInt(e.target.dataset.col);
+                        if (col > 0) {
+                            const prev = document.querySelector(`.crossword-input[data-row="${row}"][data-col="${col-1}"]`);
+                            if (prev) prev.focus();
+                        }
+                    }
+                });
+                inp.addEventListener('focus', () => {
+                    const row = parseInt(inp.dataset.row);
+                    highlightRow(row);
+                });
+            });
+            document.getElementById('crossword-info').innerHTML = '✏️ Вводи буквы — курсор переходит сам';
+        }
+
+        function highlightRow(row) {
+            document.querySelectorAll('.crossword-cell').forEach(cell => cell.classList.remove('highlight'));
+            document.querySelectorAll(`.crossword-cell[data-row="${row}"]`).forEach(cell => cell.classList.add('highlight'));
+        }
+
+        document.getElementById('btn-check-crossword')?.addEventListener('click', () => {
+            if (!currentCrossword) return;
+            let correct = 0, total = 0;
+            document.querySelectorAll('.crossword-input').forEach(inp => {
+                const row = parseInt(inp.dataset.row), col = parseInt(inp.dataset.col);
+                const val = inp.value.toUpperCase();
+                const word = currentCrossword.words[row];
+                if (word && col < word.answer.length) {
+                    total++;
+                    if (val === word.answer[col]) { inp.style.backgroundColor = '#c0e8c0'; correct++; }
+                    else inp.style.backgroundColor = '#f0b8b0';
+                }
+            });
+            document.getElementById('crossword-info').innerHTML = `✅ Правильных букв: ${correct} из ${total}`;
+            if (correct === total && total>0) playSound('correct');
+        });
+        document.getElementById('btn-clear-crossword')?.addEventListener('click', () => {
+            document.querySelectorAll('.crossword-input').forEach(inp => { inp.value = ''; inp.style.backgroundColor = ''; });
+            document.getElementById('crossword-info').innerHTML = 'Поле очищено';
+        });
+        document.getElementById('btn-hint-crossword')?.addEventListener('click', () => {
+            const inputs = document.querySelectorAll('.crossword-input');
+            const empty = Array.from(inputs).filter(i => !i.value.trim());
+            if (!empty.length) { document.getElementById('crossword-info').innerHTML = 'Всё уже заполнено!'; return; }
+            const rand = empty[Math.floor(Math.random()*empty.length)];
+            const row = parseInt(rand.dataset.row), col = parseInt(rand.dataset.col);
+            const word = currentCrossword.words[row];
+            if (word && col < word.answer.length) {
+                rand.value = word.answer[col];
+                rand.style.backgroundColor = '#e0f0e0';
+                playSound('hint');
+                document.getElementById('crossword-info').innerHTML = `💡 Подсказка: буква "${word.answer[col]}"`;
+            }
+        });
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const btns = document.querySelectorAll('.sound-toggle');
+            btns.forEach(btn => btn.textContent = soundEnabled ? '🔊 Звук вкл' : '🔇 Звук выкл');
+        }
+        document.getElementById('sound-toggle')?.addEventListener('click', toggleSound);
+        document.getElementById('sound-toggle-crossword')?.addEventListener('click', toggleSound);
+
+        function showModeScreen(cat) {
+            currentCategory = cat;
+            modeCategoryTitle.textContent = cat === 'young' ? 'Молодёжные' : 'Литературные';
+            menuScreen.classList.add('hidden');
+            modeScreen.classList.remove('hidden');
+        }
+        btnYoung.addEventListener('click', () => showModeScreen('young'));
+        btnSimple.addEventListener('click', () => showModeScreen('simple'));
+        btnBackFromMode.addEventListener('click', () => { modeScreen.classList.add('hidden'); menuScreen.classList.remove('hidden'); });
+        btnModeClassic.addEventListener('click', () => { loadClassic(); modeScreen.classList.add('hidden'); gameScreen.classList.remove('hidden'); });
+        btnModeCrossword.addEventListener('click', () => { loadCrossword(); modeScreen.classList.add('hidden'); crosswordScreen.classList.remove('hidden'); });
+        btnBackFromGame.addEventListener('click', () => { stopTimer(); gameScreen.classList.add('hidden'); modeScreen.classList.remove('hidden'); });
+        btnBackFromCrossword.addEventListener('click', () => { crosswordScreen.classList.add('hidden'); modeScreen.classList.remove('hidden'); });
+        window.addEventListener('click', function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext); }, { once: true });
+    })();
+</script>
+</body>
+</html>
